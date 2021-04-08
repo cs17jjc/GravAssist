@@ -26,25 +26,25 @@ class LevelState{
         var newLevelState = R.clone(levelState);
 
         newLevelState.playerAcceleration = createVector(0,0,0);
-        if(inputsArr.includes("UP")){newLevelState.playerAcceleration.add(createVector(0,-5,0))}
-        if(inputsArr.includes("DOWN")){newLevelState.playerAcceleration.add(createVector(0,5,0))}
-        if(inputsArr.includes("RIGHT")){newLevelState.playerAcceleration.add(createVector(5,0,0))}
-        if(inputsArr.includes("LEFT")){newLevelState.playerAcceleration.add(createVector(-5,0,0))}
+        if(inputsArr.includes("UP")){newLevelState.playerAcceleration.add(createVector(0,-5))}
+        if(inputsArr.includes("DOWN")){newLevelState.playerAcceleration.add(createVector(0,5))}
+        if(inputsArr.includes("RIGHT")){newLevelState.playerAcceleration.add(createVector(5,0))}
+        if(inputsArr.includes("LEFT")){newLevelState.playerAcceleration.add(createVector(-5,0))}
 
-        console.log(newLevelState.playerVelocity);
-        newLevelState.playerVelocity = p5.Vector.add(newLevelState.playerVelocity,newLevelState.playerAcceleration);
-        console.log(newLevelState.playerVelocity);
-        newLevelState.playerVelocity = p5.Vector.mult(newLevelState.playerVelocity,createVector(0.8,0.8,0));
+        newLevelState.playerVelocity.x += newLevelState.playerAcceleration.x;
+        newLevelState.playerVelocity.y += newLevelState.playerAcceleration.y;
+
+        newLevelState.playerVelocity.x *= 0.8;
+        newLevelState.playerVelocity.y *= 0.8;
+
+        const nextPosition = createVector(newLevelState.playerPosition.x + newLevelState.playerVelocity.x,
+                                          newLevelState.playerPosition.y + newLevelState.playerVelocity.y);
         
-        const nextPosition = p5.Vector.add(newLevelState.playerPosition,newLevelState.playerVelocity);
-        console.log(newLevelState.playerPosition);
-        console.log(newLevelState.playerVelocity);
-        console.log(nextPosition);
         const playerTileX = Math.trunc(levelState.playerPosition.x / LevelState.tileSize);
         const playerTileY = Math.trunc(levelState.playerPosition.y / LevelState.tileSize);
         const nextPlayerTileX = Math.trunc(nextPosition.x / LevelState.tileSize);
         const nextPlayerTileY = Math.trunc(nextPosition.y / LevelState.tileSize);
-
+    
 
         if(newLevelState.tiles[playerTileX][nextPlayerTileY].isWall){
             newLevelState.playerVelocity.y = 0;
@@ -52,13 +52,10 @@ class LevelState{
         if(newLevelState.tiles[nextPlayerTileX][playerTileY].isWall){
             newLevelState.playerVelocity.x = 0;
         }
-        if(newLevelState.tiles[nextPlayerTileX][nextPlayerTileY].isWall){
-            newLevelState.playerVelocity.x = 0;
-            newLevelState.playerVelocity.y = 0;
-        }
         
 
-        newLevelState.playerPosition.add(newLevelState.playerVelocity);
+        newLevelState.playerPosition = createVector(newLevelState.playerPosition.x + newLevelState.playerVelocity.x,
+                                                    newLevelState.playerPosition.y + newLevelState.playerVelocity.y);
         
         return newLevelState;
     }
