@@ -227,6 +227,49 @@ class LevelState{
         var sats = [createSat(Math.trunc(canvasWidth/2),Math.trunc(canvasHeight/2) - 150,1,0,5,0.5)];
         return new LevelState(8,playerPosition,playerVelocity,playerMass,playerRadius,30,bodyOfInfluencePosition,bodyOfInfluenceMass,bodyOfInfluenceRadius,targets,sats);
     }
+    static level4(){
+        var playerPosition = {x:Math.trunc(canvasWidth/2),y:Math.trunc(canvasHeight/2) + 50};
+        var playerVelocity = {x:2.8,y:0};
+        var playerMass = 0.2;
+        var playerRadius = 5;
+
+        var bodyOfInfluencePosition = {x:Math.trunc(canvasWidth/2),y:Math.trunc(canvasHeight/2)};
+        var bodyOfInfluenceMass = 800;
+        var bodyOfInfluenceRadius = 15;
+
+        var targets = [
+            createSatTarget(2.2,0,5,0.2,30,createTarget(canvasWidth/2,canvasHeight/2 + 80,15,"POINT")),
+            createTarget(0,0,0,"END")];
+        
+        var sats = [];
+        return new LevelState(9,playerPosition,playerVelocity,playerMass,playerRadius,200,bodyOfInfluencePosition,bodyOfInfluenceMass,bodyOfInfluenceRadius,targets,sats);
+    }
+    static level5(){
+        var playerPosition = {x:Math.trunc(canvasWidth/2),y:Math.trunc(canvasHeight/2) + 50};
+        var playerVelocity = {x:2.8,y:0};
+        var playerMass = 0.2;
+        var playerRadius = 5;
+
+        var bodyOfInfluencePosition = {x:Math.trunc(canvasWidth/2),y:Math.trunc(canvasHeight/2)};
+        var bodyOfInfluenceMass = 800;
+        var bodyOfInfluenceRadius = 15;
+
+        var timedTarget = createTimeTarget(12_000,[
+            createTarget(canvasWidth/2+80,canvasHeight/2,13,"POINT",false),
+            createTarget(canvasWidth/2,canvasHeight/2+50,13,"POINT",false),
+            createTarget(canvasWidth/2-80,canvasHeight/2,13,"POINT",false),
+            createTarget(canvasWidth/2,canvasHeight/2-140,13,"POINT",false)
+        ]);
+
+        var targets = [
+            createTarget(canvasWidth/2,canvasHeight/2-140,15,"POINT"),
+            timedTarget,
+            createSatTarget(0,-1.5,5,0.2,50,createTarget(canvasWidth/2 - 140,canvasHeight/2,15,"POINT")),
+            createTarget(0,0,0,"END")];
+        
+        var sats = [];
+        return new LevelState(10,playerPosition,playerVelocity,playerMass,playerRadius,200,bodyOfInfluencePosition,bodyOfInfluenceMass,bodyOfInfluenceRadius,targets,sats);
+    }
     static tfp(){
         var playerPosition = {x:Math.trunc(canvasWidth/2),y:Math.trunc(canvasHeight/2) + 50};
         var playerVelocity = {x:2.8,y:0};
@@ -277,6 +320,32 @@ class LevelState{
                 s.x += s.xvel;
                 s.y += s.yvel;
             });
+
+            if(this.targets[0].type=="SAT"){
+                var t = this.targets[0];
+
+                const distance = calcDistance({x:t.p.x,y:t.p.y},this.bodyOfInfluencePosition);
+                const gForceMagnitute = calcForce(distance,t.m,this.bodyOfInfluenceMass);
+                const angle = calcAngle({x:t.p.x,y:t.p.y},this.bodyOfInfluencePosition);
+                const force = calcComponents(gForceMagnitute,angle);
+                const accel = {x:force.x/t.m,y:force.y/t.m};
+
+                t.xvel += accel.x;
+                t.yvel += accel.y;
+
+                t.p.x += t.xvel;
+                t.p.y += t.yvel;
+
+                if(t.p.completed){
+                    t.fuel += 1;
+                    this.playerFuel -= 1;
+                }
+                if(t.fuel >= t.maxFuel){
+                    t.completed = true;
+                }
+                
+
+            }
 
             if(this.targets[0].type == "TIMED" && this.targets[0].startTime != null){
                 if(this.targets[0].startTime + this.targets[0].time < Date.now()){
@@ -371,6 +440,13 @@ class LevelState{
                         this.targets[0].startTime = Date.now();
                     }
                 }
+            }
+        }
+        if(this.targets[0].type == "SAT"){
+            if(calcDistance(this.playerPosition,{x:this.targets[0].p.x,y:this.targets[0].p.y}) <= this.playerRadius + this.targets[0].p.r){
+                this.targets[0].p.completed = true;
+            } else {
+                this.targets[0].p.completed = false;
             }
         }
 

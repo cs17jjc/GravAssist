@@ -17,14 +17,20 @@ class GameState {
             var b = Math.random() > 0.5 ? 1 : 0;
             var g = Math.random() > 0.5 && (r == 1 || b == 1) ? 1 : 0;
 
+            if(!(r||b)){
+                r = 1;
+                g = 1;
+                b = 1;
+            }
+
             bgCtx.fillStyle = rgbToHex(255 * r, 255 * g, 255 * b);
             bgCtx.beginPath();
             bgCtx.arc(Math.random() * canvasWidth, Math.random() * canvasHeight, Math.random() * 2, 0, Math.PI * 2);
             bgCtx.fill();
         }
         //return new GameState([LevelState.tutorial1(),LevelState.tutorial2(), LevelState.tutorial3(), LevelState.tutorial4(), LevelState.level1()], bgCanv);
-        //return new GameState([LevelState.tutorial1(),LevelState.tutorial2(),LevelState.tutorial3(),LevelState.tutorial4(),LevelState.tutorial5(),LevelState.level1(),LevelState.tutorial6(),LevelState.level2(),LevelState.level3(),LevelState.tfp()], bgCanv);
-        return new GameState([LevelState.level3(), LevelState.tfp()], bgCanv);
+        return new GameState([LevelState.tutorial1(),LevelState.tutorial2(),LevelState.tutorial3(),LevelState.tutorial4(),LevelState.tutorial5(),LevelState.level1(),LevelState.tutorial6(),LevelState.level2(),LevelState.level3(),LevelState.level4(),LevelState.level5(),LevelState.tfp()], bgCanv);
+        //return new GameState([LevelState.level5(), LevelState.tfp()], bgCanv);
     }
 
     updateLevelState(inputArr) {
@@ -66,6 +72,12 @@ class GameState {
                 case 8:
                     this.currentLevel = LevelState.level3();
                     break;
+                case 9:
+                    this.currentLevel = LevelState.level4();
+                    break;
+                case 10:
+                    this.currentLevel = LevelState.level5();
+                    break;
             }
         }
         this.updateLevelState(inputsArr);
@@ -99,7 +111,7 @@ class GameState {
         ctx.restore();
     }
 
-    drawFuel(ctx, max, current) {
+    drawFuel(ctx, max, current, minimum) {
         var g = 1;
         var r = 0;
         if (current == 0) {
@@ -124,6 +136,12 @@ class GameState {
         ctx.fillRect(x, y, width, height);
         ctx.fillStyle = rgbToHex(255 * r, 255 * g, 0);
         ctx.fillRect(x, y + (height * (1 - percentLeft)), width, height * percentLeft);
+
+        if(minimum != 0){
+            const minimumPercent = minimum/max;
+            ctx.fillStyle = rgbToHex(0, 120, 0);
+            ctx.fillRect(x, y + (height * (1 - minimumPercent)), width, 5);
+        }
     }
 
     draw(ctx) {
@@ -227,6 +245,19 @@ class GameState {
                 ctx.fillStyle = rgbToHex(0, 0, 0);
                 ctx.fillText(i + 1, p.x, p.y + 5);
             }
+        } else if(this.currentLevel.targets[0].type == "SAT"){
+            var t = this.currentLevel.targets[0];
+            const angle = calcAngle({x:t.p.x,y:t.p.y},this.currentLevel.bodyOfInfluencePosition);
+            this.drawSat(ctx,{x:t.p.x,y:t.p.y},angle,t.r);
+            ctx.fillStyle = rgbToHexAlpha(255, 0, 0, 150);
+            ctx.beginPath();
+            ctx.arc(t.p.x, t.p.y, t.p.r, 0, 2 * Math.PI);
+            ctx.fill();
+
+            ctx.fillStyle = rgbToHexAlpha(0, 255, 0, 150);
+            ctx.beginPath();
+            ctx.arc(t.p.x, t.p.y, t.p.r * (t.fuel/t.maxFuel), 0, 2 * Math.PI);
+            ctx.fill();
         }
 
 
@@ -235,27 +266,30 @@ class GameState {
         ctx.drawImage(this.currentLevel.planetGraphics, -this.currentLevel.bodyOfInfluenceRadius, -this.currentLevel.bodyOfInfluenceRadius);
         ctx.setTransform(1, 0, 0, 1, 0, 0);
 
-        ctx.fillStyle = rgbToHex(0, 255, 0);
         ctx.textAlign = "center";
         ctx.font = "15px Courier New";
         switch (this.currentLevel.id) {
             case 0:
                 drawTextOvergray(ctx);
+                ctx.fillStyle = rgbToHex(0, 255, 0);
                 ctx.fillText("Use WASD to move.", canvasWidth * 0.5, canvasHeight * 0.8);
                 ctx.fillText("Move to each green target to advance.", canvasWidth * 0.5, canvasHeight * 0.84);
                 ctx.fillText("If you run out of fuel, press R to restart the level.", canvasWidth * 0.5, canvasHeight * 0.88);
                 break;
             case 1:
                 drawTextOvergray(ctx);
+                ctx.fillStyle = rgbToHex(0, 255, 0);
                 ctx.fillText("Moving right in the red area will increase your height on the opposite side of the planet.", canvasWidth * 0.5, canvasHeight * 0.8);
                 ctx.fillText("Keep moving until the green arrow ends up inside the target.", canvasWidth * 0.5, canvasHeight * 0.84);
                 break;
             case 2:
                 drawTextOvergray(ctx);
+                ctx.fillStyle = rgbToHex(0, 255, 0);
                 ctx.fillText("It may take more than one orbit to reach the desired height.", canvasWidth * 0.5, canvasHeight * 0.8);
                 break;
             case 3:
                 drawTextOvergray(ctx);
+                ctx.fillStyle = rgbToHex(0, 255, 0);
                 if (this.currentLevel.targets.length == 3) {
                     ctx.fillText("Moving in the same direction you're traveling will raise your height on the other side of the planet.", canvasWidth * 0.5, canvasHeight * 0.8);
                 } else if (this.currentLevel.targets.length == 2) {
@@ -264,12 +298,28 @@ class GameState {
                 break;
             case 4:
                 drawTextOvergray(ctx);
-                ctx.fillText("Make sure not to hit other satalites.", canvasWidth * 0.5, canvasHeight * 0.8);
+                ctx.fillStyle = rgbToHex(0, 255, 0);
+                ctx.fillText("Make sure not to hit other satellites.", canvasWidth * 0.5, canvasHeight * 0.8);
                 break;
             case 5:
                 drawTextOvergray(ctx);
+                ctx.fillStyle = rgbToHex(0, 255, 0);
                 ctx.fillText("Timed targets require you reach each target before the timer runs out.", canvasWidth * 0.5, canvasHeight * 0.8);
                 ctx.fillText("By moving down at target 1 you can nudge your trajectory to cover all targets.", canvasWidth * 0.5, canvasHeight * 0.84);
+                break;
+            case 9:
+                drawTextOvergray(ctx);
+                ctx.fillStyle = rgbToHex(0, 255, 0);
+                ctx.fillText("Perform a fuel transfer by matching the orbit of the highlighted satellite.", canvasWidth * 0.5, canvasHeight * 0.8);
+                ctx.fillText("To catch up to the satellite, aim your trajectory slightly lower than it.", canvasWidth * 0.5, canvasHeight * 0.84);
+                ctx.fillText("The dark bar on the fuel gauge show the minimum fuel needed for every satellite.", canvasWidth * 0.5, canvasHeight * 0.88);
+                break;
+            case 10:
+                drawTextOvergray(ctx);
+                ctx.fillStyle = rgbToHex(0, 255, 0);
+                if(this.currentLevel.targets.length == 3){
+                    ctx.fillText("Reverse your orbit by moving up and right at target 4.", canvasWidth * 0.5, canvasHeight * 0.8);
+                }
                 break;
         }
 
@@ -279,7 +329,9 @@ class GameState {
         }
 
         if (this.currentLevel.id != -1) {
-            this.drawFuel(ctx, this.currentLevel.maxPlayerFuel, this.currentLevel.playerFuel);
+            var minFuel = 0;
+            this.currentLevel.targets.filter(t => t.type == "SAT" && !t.completed).forEach(t => minFuel = minFuel + (t.maxFuel - t.fuel));
+            this.drawFuel(ctx, this.currentLevel.maxPlayerFuel, this.currentLevel.playerFuel, minFuel);
             ctx.font = "20px Courier New";
             ctx.textAlign = "left";
             ctx.fillStyle = rgbToHex(0, 220, 0);

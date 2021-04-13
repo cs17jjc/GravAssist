@@ -75,6 +75,9 @@ function calcRadiAngleForTrajectory(playerPos,playerVel,playerMass,boiPos,boiMas
   function createSat(x,y,vx,vy,r,mass){
     return {x:x,y:y,xvel:vx,yvel:vy,r:r,m:mass};
   }
+  function createSatTarget(vx,vy,r,mass,maxFuel,targetPoint){
+    return {xvel:vx,yvel:vy,r:r,m:mass,p:targetPoint,fuel:0,maxFuel:maxFuel,type:"SAT"};
+  }
   function createPlanetGraphics(radius){
     var bgCanv = document.createElement("canvas");
     bgCanv.width = radius*2;
