@@ -6,33 +6,24 @@ class Inputs{
     static empty(){
         return new Inputs(new Map(), new Map());
     }
-    static attachInput(inputs,name,keyCode){
-        var newInputs = R.clone(inputs)
-        newInputs.namesKeycode.set(name,keyCode);
-        newInputs.currentStates.set(keyCode,false);
-        return newInputs;
+    attachInput(name,keyCode){
+        this.namesKeycode.set(name,keyCode);
+        this.currentStates.set(keyCode,false);
     }
-    static update(inputs,keyCode,value){
-        var newInputs = R.clone(inputs)
-        newInputs.currentStates.set(keyCode,value);
-        return newInputs;
+    update(keyCode,value){
+        this.currentStates.set(keyCode,value);
     }
-    static attachInputs(inputs){
-        var newInputs = R.clone(inputs)
-        newInputs = Inputs.attachInput(newInputs,"UP",'w');
-        newInputs = Inputs.attachInput(newInputs,"DOWN",'s');
-        newInputs = Inputs.attachInput(newInputs,"LEFT",'a');
-        newInputs = Inputs.attachInput(newInputs,"RIGHT",'d');
-        return newInputs;
+    attachInputs(){
+        this.attachInput("UP",'w');
+        this.attachInput("DOWN",'s');
+        this.attachInput("LEFT",'a');
+        this.attachInput("RIGHT",'d');
+        this.attachInput("SPACE",' ');
+        this.attachInput("RESTART",'r');
     }
-    static getInputs(inputs){
-        const nameKeys = Array.from(inputs.namesKeycode.keys());
-        const namesValue = R.map(n => {
-            return {name:n,value:inputs.currentStates.get(inputs.namesKeycode.get(n))}
-        },nameKeys);
-        const output = R.map((nv) => {return nv.name},
-                        R.filter((nv) => {return nv.value},
-                            namesValue));
-        return output;
+    getInputs(){
+        const nameKeys = Array.from(this.namesKeycode.keys());
+        const namesValue = nameKeys.map(n => {return {name:n,value:this.currentStates.get(this.namesKeycode.get(n))}});
+        return namesValue.filter(nv => {return nv.value}).map(nv => {return nv.name});
     }
 }

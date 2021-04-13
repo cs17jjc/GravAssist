@@ -1,22 +1,27 @@
-var graphics;
-var gameState;
-var inputs;
-function setup(){
-    createCanvas(960,540);
-    graphics = createGraphics(960,540);
-    gameState = GameState.initial();
+var c = document.getElementById("canvas");
+var ctx = c.getContext("2d");
+var canvasWidth = c.width;
+var canvasHeight = c.height;
+var gameState = GameState.initial();
+var inputs = Inputs.empty();
+inputs.attachInputs();
 
-    inputs = Inputs.attachInputs(Inputs.empty());
-    document.addEventListener('keydown', (e) => {
-        inputs = Inputs.update(inputs,e.key,true);
-    });
-    document.addEventListener('keyup', (e) => {
-        inputs = Inputs.update(inputs,e.key,false);
-    });
+document.addEventListener('keydown', (e) => {
+    inputs.update(e.key,true);
+});
+document.addEventListener('keyup', (e) => {
+    inputs.update(e.key,false);
+});
+
+
+
+function draw(ctx){
+    ctx.clearRect(0,0,canvasWidth,canvasHeight);
+    gameState.update(inputs.getInputs());
+    ctx.save();
+    gameState.draw(ctx);
+    ctx.restore();
 }
 
-function draw(){
-    background(0);
-    gameState = GameState.update(gameState,Inputs.getInputs(inputs));
-    GameState.draw(gameState);
-}
+
+setInterval(() => draw(ctx),50);
