@@ -270,6 +270,24 @@ class LevelState{
         var sats = [];
         return new LevelState(10,playerPosition,playerVelocity,playerMass,playerRadius,200,bodyOfInfluencePosition,bodyOfInfluenceMass,bodyOfInfluenceRadius,targets,sats);
     }
+    static level6(){
+        var playerPosition = {x:Math.trunc(canvasWidth/2),y:Math.trunc(canvasHeight/2) + 50};
+        var playerVelocity = {x:2.8,y:0};
+        var playerMass = 0.2;
+        var playerRadius = 5;
+
+        var bodyOfInfluencePosition = {x:Math.trunc(canvasWidth/2),y:Math.trunc(canvasHeight/2)};
+        var bodyOfInfluenceMass = 800;
+        var bodyOfInfluenceRadius = 15;
+
+        var targets = [
+            createSatTarget(0,-1.2,5,0.2,50,createTarget(canvasWidth/2 - 80,canvasHeight/2,15,"POINT")),
+            createSatTarget(0,-1.8,5,0.2,50,createTarget(canvasWidth/2 + 60,canvasHeight/2,15,"POINT")),
+            createTarget(0,0,0,"END")];
+        
+        var sats = [];
+        return new LevelState(11,playerPosition,playerVelocity,playerMass,playerRadius,200,bodyOfInfluencePosition,bodyOfInfluenceMass,bodyOfInfluenceRadius,targets,sats);
+    }
     static tfp(){
         var playerPosition = {x:Math.trunc(canvasWidth/2),y:Math.trunc(canvasHeight/2) + 50};
         var playerVelocity = {x:2.8,y:0};

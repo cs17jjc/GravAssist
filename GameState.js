@@ -30,7 +30,7 @@ class GameState {
         }
         //return new GameState([LevelState.tutorial1(),LevelState.tutorial2(), LevelState.tutorial3(), LevelState.tutorial4(), LevelState.level1()], bgCanv);
         return new GameState([LevelState.tutorial1(),LevelState.tutorial2(),LevelState.tutorial3(),LevelState.tutorial4(),LevelState.tutorial5(),LevelState.level1(),LevelState.tutorial6(),LevelState.level2(),LevelState.level3(),LevelState.level4(),LevelState.level5(),LevelState.tfp()], bgCanv);
-        //return new GameState([LevelState.level5(), LevelState.tfp()], bgCanv);
+        //return new GameState([LevelState.level6(),LevelState.tfp()], bgCanv);
     }
 
     updateLevelState(inputArr) {
@@ -77,6 +77,9 @@ class GameState {
                     break;
                 case 10:
                     this.currentLevel = LevelState.level5();
+                    break;
+                case 11:
+                    this.currentLevel = LevelState.level6();
                     break;
             }
         }
@@ -350,6 +353,8 @@ class GameState {
             ctx.font = "50px Courier New";
             ctx.fillStyle = rgbToHex(0, 220, 0);
             ctx.fillText("Thanks for playing!", canvasWidth / 2, canvasHeight * 0.2);
+            ctx.font = "90px Courier New";
+            ctx.fillText("♡", canvasWidth / 2, canvasHeight/2+35);
         }
 
 
