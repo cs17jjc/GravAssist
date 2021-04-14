@@ -3,6 +3,7 @@ class GameState {
         this.levels = levels;
         this.currentLevel = this.levels.shift();
         this.background = background;
+        this.sound = 1;
     }
     static initial() {
         var bgCanv = document.createElement("canvas");
@@ -17,7 +18,7 @@ class GameState {
             var b = Math.random() > 0.5 ? 1 : 0;
             var g = Math.random() > 0.5 && (r == 1 || b == 1) ? 1 : 0;
 
-            if(!(r||b)){
+            if (!(r || b)) {
                 r = 1;
                 g = 1;
                 b = 1;
@@ -29,19 +30,35 @@ class GameState {
             bgCtx.fill();
         }
         //return new GameState([LevelState.tutorial1(),LevelState.tutorial2(), LevelState.tutorial3(), LevelState.tutorial4(), LevelState.level1()], bgCanv);
-        return new GameState([LevelState.tutorial1(),LevelState.tutorial2(),LevelState.tutorial3(),LevelState.tutorial4(),LevelState.tutorial5(),LevelState.level1(),LevelState.tutorial6(),LevelState.level2(),LevelState.level3(),LevelState.level4(),LevelState.level5(),LevelState.tfp()], bgCanv);
-        //return new GameState([LevelState.level6(),LevelState.tfp()], bgCanv);
+        //return new GameState(startPlaylist, bgCanv);
+        var plst = makePlaylist();
+        //var plst = [LevelState.level1(),LevelState.tfp()];
+        return new GameState(plst, bgCanv);
     }
 
-    updateLevelState(inputArr) {
-        this.currentLevel.update(inputArr);
+    updateLevelState(inputArr,soundToggle) {
+        this.currentLevel.update(inputArr,soundToggle);
     }
 
-    update(inputsArr) {
+    update(inputsArr,soundToggle) {
         if (inputsArr.includes("SPACE")) {
-            if (this.currentLevel.completed) {
+            if (this.currentLevel.completed && this.currentLevel.id != -2) {
                 this.currentLevel = this.levels.shift();
             }
+        }
+        if (this.currentLevel.id == -2) {
+            var selection = this.currentLevel.targets.filter(t => t.type == "MENU" && t.completed)[0];
+            if (selection != null) {
+                switch (selection.label) {
+                    case "PLAY":
+                        this.currentLevel = this.levels.shift();
+                        break;
+                }
+            }
+        }
+        if (inputsArr.includes("ESC")) {
+            this.levels = makePlaylist();
+            this.currentLevel = this.levels.shift();
         }
         if (inputsArr.includes("RESTART")) {
             switch (this.currentLevel.id) {
@@ -81,9 +98,15 @@ class GameState {
                 case 11:
                     this.currentLevel = LevelState.level6();
                     break;
+                case 12:
+                    this.currentLevel = LevelState.level7();
+                    break;
+                case 13:
+                    this.currentLevel = LevelState.level8();
+                    break;
             }
         }
-        this.updateLevelState(inputsArr);
+        this.updateLevelState(inputsArr,soundToggle);
     }
 
     drawSat(ctx, pos, angle, size) {
@@ -140,9 +163,9 @@ class GameState {
         ctx.fillStyle = rgbToHex(255 * r, 255 * g, 0);
         ctx.fillRect(x, y + (height * (1 - percentLeft)), width, height * percentLeft);
 
-        if(minimum != 0){
-            const minimumPercent = minimum/max;
-            ctx.fillStyle = rgbToHex(0, 120, 0);
+        if (minimum != 0) {
+            const minimumPercent = minimum / max;
+            ctx.fillStyle = rgbToHexAlpha(0, 0, 0, 120);
             ctx.fillRect(x, y + (height * (1 - minimumPercent)), width, 5);
         }
     }
@@ -199,9 +222,13 @@ class GameState {
             ctx.fillRect(pos.x - size / 2, pos.y - size / 2, size, size);
         }
 
-        this.currentLevel.otherSatalites.forEach(s => {
+        this.currentLevel.rocks.forEach(s => {
             const angle = calcAngle({ x: s.x, y: s.y }, this.currentLevel.bodyOfInfluencePosition);
-            this.drawSat(ctx, { x: s.x, y: s.y }, angle, s.r);
+            ctx.save();
+            ctx.translate(s.x, s.y);
+            ctx.rotate(angle);
+            ctx.drawImage(s.g, -s.r / 2, -s.r / 2);
+            ctx.restore();
         });
 
         this.currentLevel.particles.forEach(p => {
@@ -213,6 +240,18 @@ class GameState {
 
         this.drawSat(ctx, this.currentLevel.playerPosition, this.currentLevel.playerAngle, this.currentLevel.playerRadius);
 
+        if (this.currentLevel.id == -2) {
+            ctx.textAlign = "center";
+            ctx.font = "23px Courier New";
+            this.currentLevel.targets.filter(t => t.type == "MENU").forEach(t => {
+                ctx.fillStyle = rgbToHex(t.completed ? 0 : 220, t.completed ? 220 : 0, 0);
+                ctx.beginPath();
+                ctx.arc(t.x, t.y, t.r, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.fillStyle = rgbToHex(0, 0, 0);
+                ctx.fillText(t.label, t.x, t.y + 6);
+            });
+        }
 
         if (this.currentLevel.targets[0].type == "POINT") {
             ctx.fillStyle = rgbToHexAlpha(0, 255, 0, 150);
@@ -230,7 +269,7 @@ class GameState {
                     ctx.fill();
                     ctx.fillStyle = rgbToHexAlpha(0, 255, 0, 255);
                     ctx.beginPath();
-                    var r = ((Date.now() - this.currentLevel.targets[0].startTime) / this.currentLevel.targets[0].time) * p.r;
+                    var r = (1 - ((Date.now() - this.currentLevel.targets[0].startTime) / this.currentLevel.targets[0].time)) * p.r;
                     ctx.arc(p.x, p.y, r, 0, 2 * Math.PI);
                     ctx.fill();
                 } else {
@@ -248,10 +287,10 @@ class GameState {
                 ctx.fillStyle = rgbToHex(0, 0, 0);
                 ctx.fillText(i + 1, p.x, p.y + 5);
             }
-        } else if(this.currentLevel.targets[0].type == "SAT"){
+        } else if (this.currentLevel.targets[0].type == "SAT") {
             var t = this.currentLevel.targets[0];
-            const angle = calcAngle({x:t.p.x,y:t.p.y},this.currentLevel.bodyOfInfluencePosition);
-            this.drawSat(ctx,{x:t.p.x,y:t.p.y},angle,t.r);
+            const angle = calcAngle({ x: t.p.x, y: t.p.y }, this.currentLevel.bodyOfInfluencePosition);
+            this.drawSat(ctx, { x: t.p.x, y: t.p.y }, angle, t.r);
             ctx.fillStyle = rgbToHexAlpha(255, 0, 0, 150);
             ctx.beginPath();
             ctx.arc(t.p.x, t.p.y, t.p.r, 0, 2 * Math.PI);
@@ -259,7 +298,7 @@ class GameState {
 
             ctx.fillStyle = rgbToHexAlpha(0, 255, 0, 150);
             ctx.beginPath();
-            ctx.arc(t.p.x, t.p.y, t.p.r * (t.fuel/t.maxFuel), 0, 2 * Math.PI);
+            ctx.arc(t.p.x, t.p.y, t.p.r * (t.fuel / t.maxFuel), 0, 2 * Math.PI);
             ctx.fill();
         }
 
@@ -270,19 +309,18 @@ class GameState {
         ctx.setTransform(1, 0, 0, 1, 0, 0);
 
         ctx.textAlign = "center";
-        ctx.font = "15px Courier New";
+        ctx.font = "19px Courier New";
         switch (this.currentLevel.id) {
             case 0:
                 drawTextOvergray(ctx);
                 ctx.fillStyle = rgbToHex(0, 255, 0);
-                ctx.fillText("Use WASD to move.", canvasWidth * 0.5, canvasHeight * 0.8);
-                ctx.fillText("Move to each green target to advance.", canvasWidth * 0.5, canvasHeight * 0.84);
-                ctx.fillText("If you run out of fuel, press R to restart the level.", canvasWidth * 0.5, canvasHeight * 0.88);
+                ctx.fillText("Move to each green target to advance.", canvasWidth * 0.5, canvasHeight * 0.8);
+                ctx.fillText("Press R to restart if you run out of fuel.", canvasWidth * 0.5, canvasHeight * 0.84);
                 break;
             case 1:
                 drawTextOvergray(ctx);
                 ctx.fillStyle = rgbToHex(0, 255, 0);
-                ctx.fillText("Moving right in the red area will increase your height on the opposite side of the planet.", canvasWidth * 0.5, canvasHeight * 0.8);
+                ctx.fillText("Moving right in the red area will increase your height.", canvasWidth * 0.5, canvasHeight * 0.8);
                 ctx.fillText("Keep moving until the green arrow ends up inside the target.", canvasWidth * 0.5, canvasHeight * 0.84);
                 break;
             case 2:
@@ -294,15 +332,15 @@ class GameState {
                 drawTextOvergray(ctx);
                 ctx.fillStyle = rgbToHex(0, 255, 0);
                 if (this.currentLevel.targets.length == 3) {
-                    ctx.fillText("Moving in the same direction you're traveling will raise your height on the other side of the planet.", canvasWidth * 0.5, canvasHeight * 0.8);
+                    ctx.fillText("Move in the same direction you're traveling to increase height.", canvasWidth * 0.5, canvasHeight * 0.8);
                 } else if (this.currentLevel.targets.length == 2) {
-                    ctx.fillText("Moving in the opposite direction you're traveling will lower your height on the other side of the planet.", canvasWidth * 0.5, canvasHeight * 0.8);
+                    ctx.fillText("Move in the opposite direction to decrease height.", canvasWidth * 0.5, canvasHeight * 0.8);
                 }
                 break;
             case 4:
                 drawTextOvergray(ctx);
                 ctx.fillStyle = rgbToHex(0, 255, 0);
-                ctx.fillText("Make sure not to hit other satellites.", canvasWidth * 0.5, canvasHeight * 0.8);
+                ctx.fillText("Make sure not to hit the rocks!.", canvasWidth * 0.5, canvasHeight * 0.8);
                 break;
             case 5:
                 drawTextOvergray(ctx);
@@ -310,17 +348,26 @@ class GameState {
                 ctx.fillText("Timed targets require you reach each target before the timer runs out.", canvasWidth * 0.5, canvasHeight * 0.8);
                 ctx.fillText("By moving down at target 1 you can nudge your trajectory to cover all targets.", canvasWidth * 0.5, canvasHeight * 0.84);
                 break;
-            case 9:
+            case 10:
                 drawTextOvergray(ctx);
                 ctx.fillStyle = rgbToHex(0, 255, 0);
                 ctx.fillText("Perform a fuel transfer by matching the orbit of the highlighted satellite.", canvasWidth * 0.5, canvasHeight * 0.8);
                 ctx.fillText("To catch up to the satellite, aim your trajectory slightly lower than it.", canvasWidth * 0.5, canvasHeight * 0.84);
                 ctx.fillText("The dark bar on the fuel gauge show the minimum fuel needed for every satellite.", canvasWidth * 0.5, canvasHeight * 0.88);
                 break;
-            case 10:
+            case 11:
                 drawTextOvergray(ctx);
                 ctx.fillStyle = rgbToHex(0, 255, 0);
-                if(this.currentLevel.targets.length == 3){
+                if (this.currentLevel.targets.length == 3) {
+                    ctx.fillText("Orbits closer to the planet are quicker.", canvasWidth * 0.5, canvasHeight * 0.8);
+                } else if (this.currentLevel.targets.length == 2) {
+                    ctx.fillText("Orbits further away are slower.", canvasWidth * 0.5, canvasHeight * 0.8);
+                }
+                break;
+            case 12:
+                drawTextOvergray(ctx);
+                ctx.fillStyle = rgbToHex(0, 255, 0);
+                if (this.currentLevel.targets.length == 3) {
                     ctx.fillText("Reverse your orbit by moving up and right at target 4.", canvasWidth * 0.5, canvasHeight * 0.8);
                 }
                 break;
@@ -331,10 +378,11 @@ class GameState {
             ctx.fillRect(0, 0, canvasWidth, canvasHeight);
         }
 
-        if (this.currentLevel.id != -1) {
+        if (this.currentLevel.id >= 0) {
             var minFuel = 0;
             this.currentLevel.targets.filter(t => t.type == "SAT" && !t.completed).forEach(t => minFuel = minFuel + (t.maxFuel - t.fuel));
             this.drawFuel(ctx, this.currentLevel.maxPlayerFuel, this.currentLevel.playerFuel, minFuel);
+
             ctx.font = "20px Courier New";
             ctx.textAlign = "left";
             ctx.fillStyle = rgbToHex(0, 220, 0);
@@ -348,13 +396,31 @@ class GameState {
                 ctx.textAlign = "center";
                 ctx.fillText(makeTimeString(this.currentLevel.endTime - this.currentLevel.startTime), canvasWidth * 0.5, canvasHeight * 0.4);
             }
-        } else {
+        } else if (this.currentLevel.id == -2) {
+            if (!this.currentLevel.completed) {
+                ctx.textAlign = "center";
+                ctx.fillStyle = rgbToHex(0, 220, 0);
+                ctx.font = "80px Courier New";
+                ctx.save();
+                ctx.shadowOffsetX = 3;
+                ctx.shadowOffsetY = 3;
+                ctx.shadowColor = rgbToHex(0, 50, 0);
+                ctx.fillText("GravAssist", canvasWidth / 2, canvasHeight * 0.2);
+                ctx.restore();
+                ctx.font = "20px Courier New";
+                ctx.save();
+                ctx.translate(this.currentLevel.playerPosition.x, this.currentLevel.playerPosition.y);
+                ctx.fillText("D", 40, 0);
+                ctx.fillText("W", 0, -40);
+                ctx.fillText("A", -40, 0);
+                ctx.fillText("S", 0, +40);
+                ctx.restore();
+            }
+        } else if (this.currentLevel.id == -1) {
             ctx.textAlign = "center";
             ctx.font = "50px Courier New";
             ctx.fillStyle = rgbToHex(0, 220, 0);
             ctx.fillText("Thanks for playing!", canvasWidth / 2, canvasHeight * 0.2);
-            ctx.font = "90px Courier New";
-            ctx.fillText("♡", canvasWidth / 2, canvasHeight/2+35);
         }
 
 

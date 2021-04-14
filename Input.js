@@ -1,6 +1,7 @@
 class Inputs{
     constructor(currentStates,namesKeycode){
         this.currentStates = currentStates;
+        this.prevStates = [];
         this.namesKeycode = namesKeycode;
     }
     static empty(){
@@ -20,6 +21,8 @@ class Inputs{
         this.attachInput("RIGHT",'d');
         this.attachInput("SPACE",' ');
         this.attachInput("RESTART",'r');
+        this.attachInput("ESC",'Escape');
+        this.attachInput("MUTE",'m');
     }
     getInputs(){
         const nameKeys = Array.from(this.namesKeycode.keys());

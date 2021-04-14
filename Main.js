@@ -13,14 +13,28 @@ document.addEventListener('keyup', (e) => {
     inputs.update(e.key,false);
 });
 
+let mySongData = zzfxM(...song);
+let myAudioNode = zzfxP(...mySongData);
+myAudioNode.loop = true;
+myAudioNode.start();
+var soundToggle = true;
 
 
 function draw(ctx){
     ctx.clearRect(0,0,canvasWidth,canvasHeight);
-    gameState.update(inputs.getInputs());
+    gameState.update(inputs.getInputs(),soundToggle);
     ctx.save();
     gameState.draw(ctx);
     ctx.restore();
+    if(!inputs.prevStates.includes("MUTE") && inputs.getInputs().includes("MUTE")){
+        if(soundToggle){
+            myAudioNode.disconnect();
+        } else {
+            myAudioNode.connect(zzfxX.destination);
+        }
+        soundToggle = !soundToggle;
+    }
+    inputs.prevStates = inputs.getInputs();
 }
 
 

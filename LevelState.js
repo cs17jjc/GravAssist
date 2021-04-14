@@ -1,5 +1,5 @@
 class LevelState{
-    constructor(id,playerPos,playerVel,playerMass,playerRadius,playerFuel,boiPos,boiMass,boiRadius,targets,otherSats){
+    constructor(id,playerPos,playerVel,playerMass,playerRadius,playerFuel,boiPos,boiMass,boiRadius,targets,rocks){
         this.id = id;
 
         this.playerPosition = playerPos;
@@ -32,12 +32,12 @@ class LevelState{
         this.currentTargets = [];
         this.maxTarget = targets.length-1;
         
-        this.otherSatalites = otherSats;
+        this.rocks = rocks;
     }
 
     static tutorial1(){
 
-        var playerPosition = {x:Math.trunc(canvasWidth/2),y:Math.trunc(canvasHeight/2) + 10};
+        var playerPosition = {x:Math.trunc(canvasWidth/2),y:Math.trunc(canvasHeight/2)};
         var playerVelocity = {x:0,y:0};
         var playerMass = 0.1;
         var playerRadius = 5;
@@ -47,13 +47,13 @@ class LevelState{
         var bodyOfInfluenceRadius = 1;
 
         var targets = [
-            createTarget(canvasWidth*0.5-60,canvasHeight*0.5,10,"POINT",false),
-            createTarget(canvasWidth*0.5+60,canvasHeight*0.5,10,"POINT",false),
-            createTarget(canvasWidth*0.5,canvasHeight*0.5-60,10,"POINT",false),
-            createTarget(canvasWidth*0.5,canvasHeight*0.5+60,10,"POINT",false),
+            createTarget(canvasWidth*0.5-90,canvasHeight*0.5,10,"POINT",false),
+            createTarget(canvasWidth*0.5+90,canvasHeight*0.5,10,"POINT",false),
+            createTarget(canvasWidth*0.5,canvasHeight*0.5-90,10,"POINT",false),
+            createTarget(canvasWidth*0.5,canvasHeight*0.5+90,10,"POINT",false),
             createTarget(0,0,0,"END")];
 
-        return new LevelState(0,playerPosition,playerVelocity,playerMass,playerRadius,200,bodyOfInfluencePosition,bodyOfInfluenceMass,bodyOfInfluenceRadius,targets,[]);
+        return new LevelState(0,playerPosition,playerVelocity,playerMass,playerRadius,250,bodyOfInfluencePosition,bodyOfInfluenceMass,bodyOfInfluenceRadius,targets,[]);
     }
     static tutorial2(){
 
@@ -127,8 +127,8 @@ class LevelState{
 
             createTarget(0,0,0,"END")];
 
-        var sats = [createSat(Math.trunc(canvasWidth/2),Math.trunc(canvasHeight/2) - 70,3,0,5,0.2)];
-        return new LevelState(4,playerPosition,playerVelocity,playerMass,playerRadius,200,bodyOfInfluencePosition,bodyOfInfluenceMass,bodyOfInfluenceRadius,targets,sats);
+        var rocks = [createRock(Math.trunc(canvasWidth/2),Math.trunc(canvasHeight/2) - 70,3,0,5,0.2)];
+        return new LevelState(4,playerPosition,playerVelocity,playerMass,playerRadius,200,bodyOfInfluencePosition,bodyOfInfluenceMass,bodyOfInfluenceRadius,targets,rocks);
     }
     static tutorial6(){
 
@@ -170,8 +170,8 @@ class LevelState{
             createRandomPointTarget(bodyOfInfluencePosition,80,150,15,20),
             createTarget(0,0,0,"END")];
         
-        var sats = [createSat(Math.trunc(canvasWidth/2),Math.trunc(canvasHeight/2) - 90,2,0,5,0.2)];
-        return new LevelState(6,playerPosition,playerVelocity,playerMass,playerRadius,200,bodyOfInfluencePosition,bodyOfInfluenceMass,bodyOfInfluenceRadius,targets,sats);
+        var rocks = [createRock(Math.trunc(canvasWidth/2),Math.trunc(canvasHeight/2) - 90,2,0,5,0.2)];
+        return new LevelState(6,playerPosition,playerVelocity,playerMass,playerRadius,200,bodyOfInfluencePosition,bodyOfInfluenceMass,bodyOfInfluenceRadius,targets,rocks);
     }
     static level2(){
         var playerPosition = {x:Math.trunc(canvasWidth/2),y:Math.trunc(canvasHeight/2) + 50};
@@ -199,8 +199,8 @@ class LevelState{
             timedTarget2,
             createTarget(0,0,0,"END")];
         
-        var sats = [createSat(Math.trunc(canvasWidth/2),Math.trunc(canvasHeight/2) + 180,-1,0,5,1)];
-        return new LevelState(7,playerPosition,playerVelocity,playerMass,playerRadius,100,bodyOfInfluencePosition,bodyOfInfluenceMass,bodyOfInfluenceRadius,targets,sats);
+        var rocks = [createRock(Math.trunc(canvasWidth/2),Math.trunc(canvasHeight/2) + 180,-1,0,5,1)];
+        return new LevelState(7,playerPosition,playerVelocity,playerMass,playerRadius,100,bodyOfInfluencePosition,bodyOfInfluenceMass,bodyOfInfluenceRadius,targets,rocks);
     }
     static level3(){
         var playerPosition = {x:Math.trunc(canvasWidth/2),y:Math.trunc(canvasHeight/2) + 50};
@@ -224,10 +224,33 @@ class LevelState{
             timedTarget,
             createTarget(0,0,0,"END")];
         
-        var sats = [createSat(Math.trunc(canvasWidth/2),Math.trunc(canvasHeight/2) - 150,1,0,5,0.5)];
-        return new LevelState(8,playerPosition,playerVelocity,playerMass,playerRadius,30,bodyOfInfluencePosition,bodyOfInfluenceMass,bodyOfInfluenceRadius,targets,sats);
+        var rocks = [createRock(Math.trunc(canvasWidth/2),Math.trunc(canvasHeight/2) - 150,1,0,5,0.5)];
+        return new LevelState(8,playerPosition,playerVelocity,playerMass,playerRadius,30,bodyOfInfluencePosition,bodyOfInfluenceMass,bodyOfInfluenceRadius,targets,rocks);
     }
     static level4(){
+        var playerPosition = {x:Math.trunc(canvasWidth/2),y:Math.trunc(canvasHeight/2) + 50};
+        var playerVelocity = {x:3.3,y:0};
+        var playerMass = 0.4;
+        var playerRadius = 5;
+
+        var bodyOfInfluencePosition = {x:Math.trunc(canvasWidth/2),y:Math.trunc(canvasHeight/2)};
+        var bodyOfInfluenceMass = 1200;
+        var bodyOfInfluenceRadius = 20;
+
+        var timedTarget = createTimeTarget(12_000,[
+            createTarget(canvasWidth/2-80,canvasHeight/2,13,"POINT",false),
+            createTarget(canvasWidth/2+80,canvasHeight/2,13,"POINT",false),
+            createTarget(canvasWidth/2 - 180,canvasHeight/2,13,"POINT",false),
+        ]);
+
+        var targets = [
+            createTarget(canvasWidth/2 + 180,canvasHeight/2,13,"POINT",false),
+            timedTarget,
+            createTarget(0,0,0,"END")];
+        
+        return new LevelState(9,playerPosition,playerVelocity,playerMass,playerRadius,250,bodyOfInfluencePosition,bodyOfInfluenceMass,bodyOfInfluenceRadius,targets,[]);
+    }
+    static level5(){
         var playerPosition = {x:Math.trunc(canvasWidth/2),y:Math.trunc(canvasHeight/2) + 50};
         var playerVelocity = {x:2.8,y:0};
         var playerMass = 0.2;
@@ -241,10 +264,26 @@ class LevelState{
             createSatTarget(2.2,0,5,0.2,30,createTarget(canvasWidth/2,canvasHeight/2 + 80,15,"POINT")),
             createTarget(0,0,0,"END")];
         
-        var sats = [];
-        return new LevelState(9,playerPosition,playerVelocity,playerMass,playerRadius,200,bodyOfInfluencePosition,bodyOfInfluenceMass,bodyOfInfluenceRadius,targets,sats);
+        return new LevelState(10,playerPosition,playerVelocity,playerMass,playerRadius,200,bodyOfInfluencePosition,bodyOfInfluenceMass,bodyOfInfluenceRadius,targets,[]);
     }
-    static level5(){
+    static level6(){
+        var playerPosition = {x:Math.trunc(canvasWidth/2),y:Math.trunc(canvasHeight/2) + 80};
+        var playerVelocity = {x:3,y:0};
+        var playerMass = 0.2;
+        var playerRadius = 5;
+
+        var bodyOfInfluencePosition = {x:Math.trunc(canvasWidth/2),y:Math.trunc(canvasHeight/2)};
+        var bodyOfInfluenceMass = 1500;
+        var bodyOfInfluenceRadius = 15;
+
+        var targets = [
+            createSatTarget(4.2,0,5,0.2,30,createTarget(canvasWidth/2,canvasHeight/2 + 40,15,"POINT")),
+            createSatTarget(2.2,0,5,0.2,30,createTarget(canvasWidth/2,canvasHeight/2 + 120,15,"POINT")),
+            createTarget(0,0,0,"END")];
+        
+        return new LevelState(11,playerPosition,playerVelocity,playerMass,playerRadius,200,bodyOfInfluencePosition,bodyOfInfluenceMass,bodyOfInfluenceRadius,targets,[]);
+    }
+    static level7(){
         var playerPosition = {x:Math.trunc(canvasWidth/2),y:Math.trunc(canvasHeight/2) + 50};
         var playerVelocity = {x:2.8,y:0};
         var playerMass = 0.2;
@@ -267,10 +306,9 @@ class LevelState{
             createSatTarget(0,-1.5,5,0.2,50,createTarget(canvasWidth/2 - 140,canvasHeight/2,15,"POINT")),
             createTarget(0,0,0,"END")];
         
-        var sats = [];
-        return new LevelState(10,playerPosition,playerVelocity,playerMass,playerRadius,200,bodyOfInfluencePosition,bodyOfInfluenceMass,bodyOfInfluenceRadius,targets,sats);
+        return new LevelState(12,playerPosition,playerVelocity,playerMass,playerRadius,200,bodyOfInfluencePosition,bodyOfInfluenceMass,bodyOfInfluenceRadius,targets,[]);
     }
-    static level6(){
+    static level8(){
         var playerPosition = {x:Math.trunc(canvasWidth/2),y:Math.trunc(canvasHeight/2) + 50};
         var playerVelocity = {x:2.8,y:0};
         var playerMass = 0.2;
@@ -281,12 +319,26 @@ class LevelState{
         var bodyOfInfluenceRadius = 15;
 
         var targets = [
-            createSatTarget(0,-1.2,5,0.2,50,createTarget(canvasWidth/2 - 80,canvasHeight/2,15,"POINT")),
-            createSatTarget(0,-1.8,5,0.2,50,createTarget(canvasWidth/2 + 60,canvasHeight/2,15,"POINT")),
+            createSatTarget(0,2.2,5,0.2,50,createTarget(canvasWidth/2 - 80,canvasHeight/2,15,"POINT")),
+            createSatTarget(0,1.8,5,0.2,50,createTarget(canvasWidth/2 + 130,canvasHeight/2,15,"POINT")),
             createTarget(0,0,0,"END")];
         
-        var sats = [];
-        return new LevelState(11,playerPosition,playerVelocity,playerMass,playerRadius,200,bodyOfInfluencePosition,bodyOfInfluenceMass,bodyOfInfluenceRadius,targets,sats);
+        return new LevelState(13,playerPosition,playerVelocity,playerMass,playerRadius,450,bodyOfInfluencePosition,bodyOfInfluenceMass,bodyOfInfluenceRadius,targets,[]);
+    }
+    static menu(){
+        var playerPosition = {x:Math.trunc(canvasWidth/2),y:Math.trunc(canvasHeight/2)+40};
+        var playerVelocity = {x:0,y:0};
+        var playerMass = 0.1;
+        var playerRadius = 5;
+
+        var bodyOfInfluencePosition = {x:-10,y:-10};
+        var bodyOfInfluenceMass = 0;
+        var bodyOfInfluenceRadius = 1;
+
+        var targets = [createMenuTarget(canvasWidth/2,canvasHeight/2 - 50,30,"PLAY"),
+                        createTarget(0,0,0,"END")];
+        
+        return new LevelState(-2,playerPosition,playerVelocity,playerMass,playerRadius,999999999999999,bodyOfInfluencePosition,bodyOfInfluenceMass,bodyOfInfluenceRadius,targets,[]);
     }
     static tfp(){
         var playerPosition = {x:Math.trunc(canvasWidth/2),y:Math.trunc(canvasHeight/2) + 50};
@@ -302,18 +354,16 @@ class LevelState{
             createTarget(0,0,0,"END"),
             createTarget(0,0,0,"END")];
         
-        //var sats = [createSat(Math.trunc(canvasWidth/2),Math.trunc(canvasHeight/2) - 150,1.2,0,5,0.5)];
-        var sats = [];
-        return new LevelState(-1,playerPosition,playerVelocity,playerMass,playerRadius,30,bodyOfInfluencePosition,bodyOfInfluenceMass,bodyOfInfluenceRadius,targets,sats);
+        return new LevelState(-1,playerPosition,playerVelocity,playerMass,playerRadius,30,bodyOfInfluencePosition,bodyOfInfluenceMass,bodyOfInfluenceRadius,targets,[]);
     }
 
-    update(inputs){
+    update(inputs,soundToggle){
         if(this.startTime == null){
             this.startTime = Date.now();
         }
         if(!this.crashed && !this.escaped && !this.completed){
 
-            this.updatePlayerMovement(inputs);
+            this.updatePlayerMovement(inputs,soundToggle);
             
 
             this.particles.forEach(p => {
@@ -324,7 +374,7 @@ class LevelState{
                 p.x += p.xvel;
                 p.y += p.yvel;
             });
-            this.otherSatalites.forEach(s => {
+            this.rocks.forEach(s => {
                 
                 const distance = calcDistance({x:s.x,y:s.y},this.bodyOfInfluencePosition);
                 const gForceMagnitute = calcForce(distance,s.m,this.bodyOfInfluenceMass);
@@ -374,7 +424,7 @@ class LevelState{
                     this.targets[0].completed = true;
                 }
             }
-            if(this.targets[0].completed == true){
+            if(this.targets[0].completed == true && this.id != -2){
                 this.targets.shift();
             }
             if(this.targets.length == 1){
@@ -385,7 +435,7 @@ class LevelState{
         }
     }
 
-    updatePlayerMovement(inputs){
+    updatePlayerMovement(inputs,soundToggle){
         var force = {x:0,y:0};
 
         const distance = calcDistance(this.playerPosition,this.bodyOfInfluencePosition);
@@ -394,26 +444,31 @@ class LevelState{
 
         force = addVector(force,calcComponents(gForceMagnitute,this.playerAngle));
         
+        var consumption = 0;
         if(inputs.includes("UP") && this.playerFuel > 0 && this.id != -1){
             force.y -= 0.01;
             this.particles.push(createParticle(this.playerPosition,0,1));
-            this.playerFuel = Math.max(0,this.playerFuel-this.fuelConsumption);
+            consumption += this.fuelConsumption;
         }
         if(inputs.includes("DOWN") && this.playerFuel > 0 && this.id != -1){
             force.y += 0.01;
             this.particles.push(createParticle(this.playerPosition,0,-1));
-            this.playerFuel = Math.max(0,this.playerFuel-this.fuelConsumption);
+            consumption += this.fuelConsumption;
         }
         if(inputs.includes("LEFT") && this.playerFuel > 0 && this.id != -1){
             force.x -= 0.01;
             this.particles.push(createParticle(this.playerPosition,1,0));
-            this.playerFuel = Math.max(0,this.playerFuel-this.fuelConsumption);
+            consumption += this.fuelConsumption;
         }
         if(inputs.includes("RIGHT") && this.playerFuel > 0 && this.id != -1){
             force.x += 0.01;
             this.particles.push(createParticle(this.playerPosition,-1,0));
-            this.playerFuel = Math.max(0,this.playerFuel-this.fuelConsumption);
+            consumption += this.fuelConsumption;
         }
+        if(consumption > 0){
+            zzfx(...[soundToggle ? 0.4 : 0,,1e3,,.07,,4,.16,32,,209,.05,,,32]).start();
+        }
+        this.playerFuel = Math.max(0,this.playerFuel-consumption);
 
         this.playerAcceleration.x = force.x/this.playerMass;
         this.playerAcceleration.y = force.y/this.playerMass;
@@ -430,9 +485,10 @@ class LevelState{
         if(nextDist <= this.playerRadius + this.bodyOfInfluenceRadius){
             this.crashed = true;
         }
-        this.otherSatalites.forEach(s => {
+        this.rocks.forEach(s => {
             if(calcDistance({x:s.x,y:s.y},this.playerPosition) <= s.r + this.playerRadius){
                 this.crashed = true;
+                zzfx(...[soundToggle ? 1.87 : 0,,977,,.3,.81,3,3.75,.5,,,,.06,.3,-12,.2,.35,.78,]).start();
             }
         })
         if(nextPosition.x < 0 || nextPosition.x > canvasWidth || nextPosition.y < 0 || nextPosition.y > canvasHeight){
@@ -447,17 +503,25 @@ class LevelState{
         if(this.targets[0].type == "POINT"){
             if(calcDistance(this.playerPosition,{x:this.targets[0].x,y:this.targets[0].y}) <= this.playerRadius + this.targets[0].r){
                 this.targets[0].completed = true;
+                zzfx(...[1.43,,513,.01,.04,.01,1,.02,,,,,,.5,,,.03,.9,.04]).start();
             }
+        }
+        if(this.id==-2){
+            this.targets.filter(t => t.type=="MENU").forEach(t => {
+                t.completed = calcDistance(this.playerPosition,{x:t.x,y:t.y}) <= this.playerRadius + t.r
+            });
         }
         if(this.targets[0].type == "TIMED"){
             var nextTarget = this.targets[0].pointTargets.filter(p => !p.completed)[0];
             if(nextTarget != null){
                 if(calcDistance(this.playerPosition,{x:nextTarget.x,y:nextTarget.y}) <= this.playerRadius + nextTarget.r){
                     nextTarget.completed = true;
-                    if(nextTarget == this.targets[0].pointTargets[0]){
-                        this.targets[0].startTime = Date.now();
-                    }
+                    zzfx(...[1.43,,513,.01,.04,.01,1,.02,,,,,,.5,,,.03,.9,.04]).start();
                 }
+            }
+            var firstTarget = this.targets[0].pointTargets[0];
+            if(calcDistance(this.playerPosition,{x:firstTarget.x,y:firstTarget.y}) <= this.playerRadius + firstTarget.r){
+                this.targets[0].startTime = Date.now();
             }
         }
         if(this.targets[0].type == "SAT"){
