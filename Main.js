@@ -17,6 +17,7 @@ let mySongData = zzfxM(...song);
 let myAudioNode = zzfxP(...mySongData);
 myAudioNode.loop = true;
 myAudioNode.start();
+var musicToggle = true;
 var soundToggle = true;
 
 
@@ -26,13 +27,39 @@ function draw(ctx){
     ctx.save();
     gameState.draw(ctx);
     ctx.restore();
+    ctx.font = "15px Courier New";
+    ctx.fillStyle = rgbToHex(0,220,0);
+    ctx.fillText("Toggle M",canvasWidth*0.01,canvasHeight*0.92);
+    if(soundToggle){
+        ctx.font = "23px Courier New";
+        ctx.fillText("🔊",canvasWidth*0.01,canvasHeight*0.98);
+    }
+    if(musicToggle){
+        ctx.font = "40px Courier New";
+        ctx.fillText("♬",canvasWidth*0.05,canvasHeight*0.98);
+    }
+    
+    
+    
+
     if(!inputs.prevStates.includes("MUTE") && inputs.getInputs().includes("MUTE")){
-        if(soundToggle){
+        if(musicToggle && soundToggle){
+            soundToggle = !soundToggle;
+        } else if(musicToggle && !soundToggle){
+            musicToggle = !musicToggle;
+        } else if(!musicToggle && !soundToggle){
+            soundToggle = !soundToggle;
+        } else if(!musicToggle && soundToggle){
+            musicToggle = !musicToggle;
+        }
+
+        if(!musicToggle){
             myAudioNode.disconnect();
         } else {
             myAudioNode.connect(zzfxX.destination);
         }
-        soundToggle = !soundToggle;
+
+        console.log(musicToggle +" "+soundToggle);
     }
     inputs.prevStates = inputs.getInputs();
 }

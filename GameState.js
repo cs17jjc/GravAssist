@@ -1,9 +1,10 @@
 class GameState {
     constructor(levels, background) {
         this.levels = levels;
+        this.shiftedLevels = [];
+        this.selection = null;
         this.currentLevel = this.levels.shift();
         this.background = background;
-        this.sound = 1;
     }
     static initial() {
         var bgCanv = document.createElement("canvas");
@@ -32,7 +33,7 @@ class GameState {
         //return new GameState([LevelState.tutorial1(),LevelState.tutorial2(), LevelState.tutorial3(), LevelState.tutorial4(), LevelState.level1()], bgCanv);
         //return new GameState(startPlaylist, bgCanv);
         var plst = makePlaylist();
-        //var plst = [LevelState.level1(),LevelState.tfp()];
+        //var plst = [LevelState.level10(),LevelState.tfp()];
         return new GameState(plst, bgCanv);
     }
 
@@ -48,16 +49,28 @@ class GameState {
         }
         if (this.currentLevel.id == -2) {
             var selection = this.currentLevel.targets.filter(t => t.type == "MENU" && t.completed)[0];
-            if (selection != null) {
+            if (selection != null && this.selection == null) {
                 switch (selection.label) {
                     case "PLAY":
                         this.currentLevel = this.levels.shift();
                         break;
+                    case "NEXT":
+                        if(this.levels.length > 2){
+                            this.shiftedLevels.unshift(this.levels.shift());
+                        }
+                        break;
+                    case "PREV":
+                        if(this.shiftedLevels.length > 0){
+                            this.levels.unshift(this.shiftedLevels.shift());
+                        }
+                        break;
                 }
             }
+            this.selection = selection;
         }
         if (inputsArr.includes("ESC")) {
             this.levels = makePlaylist();
+            this.shiftedLevels = [];
             this.currentLevel = this.levels.shift();
         }
         if (inputsArr.includes("RESTART")) {
@@ -104,6 +117,21 @@ class GameState {
                 case 13:
                     this.currentLevel = LevelState.level8();
                     break;
+                case 14:
+                    this.currentLevel = LevelState.level9();
+                    break;
+                case 15:
+                    this.currentLevel = LevelState.level10();
+                    break;
+                case 16:
+                    this.currentLevel = LevelState.level11();
+                    break;
+                case 17:
+                    this.currentLevel = LevelState.level12();
+                    break;
+                case 18:
+                    this.currentLevel = LevelState.level13();
+                    break;
             }
         }
         this.updateLevelState(inputsArr,soundToggle);
@@ -140,7 +168,7 @@ class GameState {
     drawFuel(ctx, max, current, minimum) {
         var g = 1;
         var r = 0;
-        if (current == 0) {
+        if (current == 0 || current < minimum) {
             g = 0;
             r = 1;
         }
@@ -170,12 +198,42 @@ class GameState {
         }
     }
 
+    drawTimedTarget(ctx,target){
+        for (var i = 0; i < target.pointTargets.length; i++) {
+            var p = target.pointTargets[i];
+            if (i == 0 && p.completed == true) {
+                ctx.fillStyle = rgbToHexAlpha(255, 0, 0, 150);
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.r, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.fillStyle = rgbToHexAlpha(0, 255, 0, 255);
+                ctx.beginPath();
+                var r = (1 - ((Date.now() - target.startTime) / target.time)) * p.r;
+                ctx.arc(p.x, p.y, r, 0, 2 * Math.PI);
+                ctx.fill();
+            } else {
+                if (p.completed) {
+                    ctx.fillStyle = rgbToHexAlpha(0, 255, 0, 150);
+                } else {
+                    ctx.fillStyle = rgbToHexAlpha(255, 0, 0, 150);
+                }
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.r, 0, 2 * Math.PI);
+                ctx.fill();
+            }
+            ctx.textAlign = "center";
+            ctx.font = "15px Courier New";
+            ctx.fillStyle = rgbToHex(0, 0, 0);
+            ctx.fillText(i + 1, p.x, p.y + 5);
+        }
+    }
+
     draw(ctx) {
 
         ctx.drawImage(this.background, 0, 0);
 
         var points = 100;
-        var ra = calcRadiAngleForTrajectory(this.currentLevel.playerPosition, this.currentLevel.playerVelocity, this.currentLevel.playerMass, this.currentLevel.bodyOfInfluencePosition, this.currentLevel.bodyOfInfluenceMass, points);
+        var ra = calcRadiAngleForTrajectory(this.currentLevel.playerPosition, this.currentLevel.playerVelocity, this.currentLevel.playerMass, this.currentLevel.bodyOfInfluencePosition, this.currentLevel.bodyOfInfluenceMass,this.currentLevel.attractors,points);
         for (var i = 1; i < points; i++) {
             var pos = angleMagVector(ra[i].a + Math.PI, ra[i].r);
             pos = addVector(pos, this.currentLevel.bodyOfInfluencePosition);
@@ -221,6 +279,14 @@ class GameState {
             var size = 5 * (1 - (i / points));
             ctx.fillRect(pos.x - size / 2, pos.y - size / 2, size, size);
         }
+        this.currentLevel.attractors.forEach(a => {
+            ctx.fillStyle = rgbToHex(100, 100, 100);
+            ctx.strokeStyle = rgbToHex(50, 50, 50);
+            ctx.beginPath();
+            ctx.arc(a.x, a.y, a.r, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+        });
 
         this.currentLevel.rocks.forEach(s => {
             const angle = calcAngle({ x: s.x, y: s.y }, this.currentLevel.bodyOfInfluencePosition);
@@ -242,13 +308,13 @@ class GameState {
 
         if (this.currentLevel.id == -2) {
             ctx.textAlign = "center";
-            ctx.font = "23px Courier New";
             this.currentLevel.targets.filter(t => t.type == "MENU").forEach(t => {
                 ctx.fillStyle = rgbToHex(t.completed ? 0 : 220, t.completed ? 220 : 0, 0);
                 ctx.beginPath();
                 ctx.arc(t.x, t.y, t.r, 0, 2 * Math.PI);
                 ctx.fill();
                 ctx.fillStyle = rgbToHex(0, 0, 0);
+                ctx.font = Math.trunc(t.r*0.8).toString() +  "px Courier New";
                 ctx.fillText(t.label, t.x, t.y + 6);
             });
         }
@@ -259,34 +325,7 @@ class GameState {
             ctx.arc(this.currentLevel.targets[0].x, this.currentLevel.targets[0].y, this.currentLevel.targets[0].r, 0, 2 * Math.PI);
             ctx.fill();
         } else if (this.currentLevel.targets[0].type == "TIMED") {
-
-            for (var i = 0; i < this.currentLevel.targets[0].pointTargets.length; i++) {
-                var p = this.currentLevel.targets[0].pointTargets[i];
-                if (i == 0 && p.completed == true) {
-                    ctx.fillStyle = rgbToHexAlpha(255, 0, 0, 150);
-                    ctx.beginPath();
-                    ctx.arc(p.x, p.y, p.r, 0, 2 * Math.PI);
-                    ctx.fill();
-                    ctx.fillStyle = rgbToHexAlpha(0, 255, 0, 255);
-                    ctx.beginPath();
-                    var r = (1 - ((Date.now() - this.currentLevel.targets[0].startTime) / this.currentLevel.targets[0].time)) * p.r;
-                    ctx.arc(p.x, p.y, r, 0, 2 * Math.PI);
-                    ctx.fill();
-                } else {
-                    if (p.completed) {
-                        ctx.fillStyle = rgbToHexAlpha(0, 255, 0, 150);
-                    } else {
-                        ctx.fillStyle = rgbToHexAlpha(255, 0, 0, 150);
-                    }
-                    ctx.beginPath();
-                    ctx.arc(p.x, p.y, p.r, 0, 2 * Math.PI);
-                    ctx.fill();
-                }
-                ctx.textAlign = "center";
-                ctx.font = "15px Courier New";
-                ctx.fillStyle = rgbToHex(0, 0, 0);
-                ctx.fillText(i + 1, p.x, p.y + 5);
-            }
+            this.drawTimedTarget(ctx,this.currentLevel.targets[0]);
         } else if (this.currentLevel.targets[0].type == "SAT") {
             var t = this.currentLevel.targets[0];
             const angle = calcAngle({ x: t.p.x, y: t.p.y }, this.currentLevel.bodyOfInfluencePosition);
@@ -340,9 +379,9 @@ class GameState {
             case 4:
                 drawTextOvergray(ctx);
                 ctx.fillStyle = rgbToHex(0, 255, 0);
-                ctx.fillText("Make sure not to hit the rocks!.", canvasWidth * 0.5, canvasHeight * 0.8);
+                ctx.fillText("Make sure not to hit the asteroid!.", canvasWidth * 0.5, canvasHeight * 0.8);
                 break;
-            case 5:
+            case 6:
                 drawTextOvergray(ctx);
                 ctx.fillStyle = rgbToHex(0, 255, 0);
                 ctx.fillText("Timed targets require you reach each target before the timer runs out.", canvasWidth * 0.5, canvasHeight * 0.8);
@@ -365,9 +404,9 @@ class GameState {
                 }
                 break;
             case 12:
-                drawTextOvergray(ctx);
-                ctx.fillStyle = rgbToHex(0, 255, 0);
                 if (this.currentLevel.targets.length == 3) {
+                    drawTextOvergray(ctx);
+                    ctx.fillStyle = rgbToHex(0, 255, 0);
                     ctx.fillText("Reverse your orbit by moving up and right at target 4.", canvasWidth * 0.5, canvasHeight * 0.8);
                 }
                 break;
@@ -415,6 +454,8 @@ class GameState {
                 ctx.fillText("A", -40, 0);
                 ctx.fillText("S", 0, +40);
                 ctx.restore();
+                ctx.fillText("Level:" + this.levels[0].id, canvasWidth / 2, canvasHeight * 0.32);
+                ctx.fillText("Press escape to reset/return to the menu.", canvasWidth / 2, canvasHeight * 0.9);
             }
         } else if (this.currentLevel.id == -1) {
             ctx.textAlign = "center";
@@ -435,12 +476,16 @@ class GameState {
             ctx.fillText("Press R to restart.", canvasWidth / 2, canvasHeight * 0.3);
         }
         if (this.currentLevel.escaped) {
-            ctx.textAlign = "center";
-            ctx.font = "50px Courier New";
-            ctx.fillStyle = rgbToHex(0, 220, 0);
-            ctx.fillText("Payload Lost", canvasWidth / 2, canvasHeight * 0.2);
-            ctx.font = "30px Courier New";
-            ctx.fillText("Press R to restart.", canvasWidth / 2, canvasHeight * 0.3);
+            if(this.currentLevel.id == -2){
+                this.currentLevel = LevelState.menu();
+            } else {
+                ctx.textAlign = "center";
+                ctx.font = "50px Courier New";
+                ctx.fillStyle = rgbToHex(0, 220, 0);
+                ctx.fillText("Payload Lost", canvasWidth / 2, canvasHeight * 0.2);
+                ctx.font = "30px Courier New";
+                ctx.fillText("Press R to restart.", canvasWidth / 2, canvasHeight * 0.3);
+            }
         }
         if (this.currentLevel.completed) {
             ctx.textAlign = "center";

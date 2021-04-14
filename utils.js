@@ -34,7 +34,7 @@ function copyVector(v) {
 function angleMagVector(angle, magnitude) {
   return { x: Math.cos(angle) * magnitude, y: Math.sin(angle) * magnitude };
 }
-function calcRadiAngleForTrajectory(playerPos, playerVel, playerMass, boiPos, boiMass, n) {
+function calcRadiAngleForTrajectory(playerPos, playerVel, playerMass, boiPos, boiMass,other, n) {
   var radiAngle = [];
   var ppos = copyVector(playerPos);
   var pvel = copyVector(playerVel);
@@ -44,7 +44,13 @@ function calcRadiAngleForTrajectory(playerPos, playerVel, playerMass, boiPos, bo
     const ra = { r: dist, a: angle };
     radiAngle.push(ra);
     const force = calcForce(dist, playerMass, boiMass);
-    const forceVec = calcComponents(force, angle);
+    var forceVec = calcComponents(force, angle);
+    other.forEach(o => {
+      const distO = calcDistance(ppos, {x:o.x,y:o.y});
+      const angleO = calcAngle(ppos, {x:o.x,y:o.y});
+      const forceO = calcForce(distO, playerMass, o.m);
+      forceVec = addVector(forceVec,calcComponents(forceO,angleO));
+    });
     pvel = addVector(pvel, { x: forceVec.x / playerMass, y: forceVec.y / playerMass });
     ppos = addVector(ppos, pvel);
   }
@@ -82,6 +88,9 @@ function createSatTarget(vx, vy, r, mass, maxFuel, targetPoint) {
 }
 function createMenuTarget(x, y, r, label) {
   return { x: x, y: y, r: r, type: "MENU", label: label, completed: false };
+}
+function createAtractor(x,y,r,m){
+  return { x: x, y: y, r: r, m:m};
 }
 function createRockGraphics(radius) {
   var bgCanv = document.createElement("canvas");
@@ -155,5 +164,5 @@ function drawTextOvergray(ctx) {
   ctx.fillRect(0, canvasHeight * 0.72, canvasWidth, canvasHeight);
 }
 function makePlaylist(){
-  return [LevelState.menu(), LevelState.tutorial1(), LevelState.tutorial2(), LevelState.tutorial3(), LevelState.tutorial4(), LevelState.tutorial5(), LevelState.level1(), LevelState.tutorial6(), LevelState.level2(), LevelState.level3(), LevelState.level4(), LevelState.level5(), LevelState.level6(), LevelState.level7(),LevelState.level8(), LevelState.tfp()];
+  return [LevelState.menu(), LevelState.tutorial1(), LevelState.tutorial2(), LevelState.tutorial3(), LevelState.tutorial4(), LevelState.tutorial5(), LevelState.level1(), LevelState.tutorial6(), LevelState.level2(), LevelState.level3(), LevelState.level4(), LevelState.level5(), LevelState.level6(), LevelState.level7(),LevelState.level8(),LevelState.level9(),LevelState.level10(),LevelState.level11(),LevelState.level12(),LevelState.level13(),LevelState.tfp()];
 }
