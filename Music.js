@@ -19,7 +19,7 @@ var mkEch = (n) => gArr(18).map(i => i == 0 ? 3 : [2,6,10,14].includes(i) ? n + 
 var Ech = [mkEch(18),mkEch(22),mkEch(24),mkEch(30)];
 //Generate song pattern
 var wrp = (n) => n - (Math.trunc(n/4)*4);
-var ptrn = gArr(32).map(i => i < 8 ? wrp(i) : i < 16 ? 4 + wrp(i) : 8 + wrp(i));
+var ptrn = gArr(4).map(i => i < 8 ? wrp(i) : i < 16 ? 4 + wrp(i) : 8 + wrp(i));
 var song = [
 [
 [,0,86,,,,,.7,,,,.5,,6.7,1,.05],             //Kick
@@ -27,5 +27,5 @@ var song = [
 [.4,0,2200,,,.04,3,2,,,800,.02,,4.8,,.01,.1],  //Hi-hat
 [,0,130.81 ,,,1] //Echo Synth
 ],
-[[Ech[0]],[Ech[1]],[Ech[2]],[Ech[3]],[Ech[0],drm[0],drm[2]],[Ech[1],drm[0],drm[2]],[Ech[2],drm[0],drm[2]],[Ech[3],drm[1],drm[2]],[Ech[0],drm[0],drm[2],drm[3]],[Ech[1],drm[0],drm[2],drm[3]],[Ech[2],drm[0],drm[2],drm[3]],[Ech[3],drm[1],drm[2],drm[3]]],
+[[Ech[0]],[Ech[1]],[Ech[2]],[Ech[3]]],
 ptrn,100];

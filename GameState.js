@@ -91,10 +91,10 @@ class GameState {
                     this.currentLevel = LevelState.tutorial5();
                     break;
                 case 5:
-                    this.currentLevel = LevelState.tutorial6();
+                    this.currentLevel = LevelState.level1();
                     break;
                 case 6:
-                    this.currentLevel = LevelState.level1();
+                    this.currentLevel = LevelState.tutorial6();
                     break;
                 case 7:
                     this.currentLevel = LevelState.level2();

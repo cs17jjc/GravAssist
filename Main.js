@@ -58,8 +58,6 @@ function draw(ctx){
         } else {
             myAudioNode.connect(zzfxX.destination);
         }
-
-        console.log(musicToggle +" "+soundToggle);
     }
     inputs.prevStates = inputs.getInputs();
 }
