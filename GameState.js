@@ -32,8 +32,8 @@ class GameState {
         }
         //return new GameState([LevelState.tutorial1(),LevelState.tutorial2(), LevelState.tutorial3(), LevelState.tutorial4(), LevelState.level1()], bgCanv);
         //return new GameState(startPlaylist, bgCanv);
-        var plst = makePlaylist();
-        //var plst = [LevelState.level10(),LevelState.tfp()];
+        //var plst = makePlaylist();
+        var plst = [LevelState.temp(),LevelState.tfp()];
         return new GameState(plst, bgCanv);
     }
 
@@ -477,7 +477,9 @@ class GameState {
         }
         if (this.currentLevel.escaped) {
             if(this.currentLevel.id == -2){
-                this.currentLevel = LevelState.menu();
+                this.levels = makePlaylist();
+                this.shiftedLevels = [];
+                this.currentLevel = this.levels.shift();
             } else {
                 ctx.textAlign = "center";
                 ctx.font = "50px Courier New";

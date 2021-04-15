@@ -121,7 +121,7 @@ function createPlanetGraphics(radius) {
 
   bgCtx.save();
   bgCtx.strokeStyle = rgbToHex(0, 255, 0);
-  bgCtx.strokeWidth = 5;
+  bgCtx.strokeWidth = 10;
   bgCtx.translate(radius, radius);
 
 

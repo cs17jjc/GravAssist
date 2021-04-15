@@ -162,7 +162,7 @@ class LevelState{
         var bodyOfInfluenceMass = 1100;
         var bodyOfInfluenceRadius = 20;
 
-        var timedTarget = createTimeTarget(12_000,[
+        var timedTarget = createTimeTarget(12000,[
             createTarget(canvasWidth*0.4,canvasHeight/2,15,"POINT",false),
             createTarget(canvasWidth/2,canvasHeight*0.67,15,"POINT",false),
             createTarget(canvasWidth*0.6,canvasHeight/2,15,"POINT",false),
@@ -185,11 +185,11 @@ class LevelState{
         var bodyOfInfluenceMass = 2000;
         var bodyOfInfluenceRadius = 12;
 
-        var timedTarget1 = createTimeTarget(8_000,[
+        var timedTarget1 = createTimeTarget(8000,[
             createTarget(canvasWidth/2,canvasHeight/2 - 150,15,"POINT",false),
             createTarget(canvasWidth/2,canvasHeight/2 + 50,15,"POINT",false),
         ]);
-        var timedTarget2 = createTimeTarget(16_000,[
+        var timedTarget2 = createTimeTarget(16000,[
             createTarget(canvasWidth/2,canvasHeight/2 - 150,15,"POINT",false),
             createTarget(canvasWidth/2 - 150,canvasHeight/2,15,"POINT",false),
             createTarget(canvasWidth/2,canvasHeight/2 + 150,15,"POINT",false),
@@ -214,7 +214,7 @@ class LevelState{
         var bodyOfInfluenceMass = 800;
         var bodyOfInfluenceRadius = 20;
 
-        var timedTarget = createTimeTarget(18_000,[
+        var timedTarget = createTimeTarget(18000,[
             createTarget(canvasWidth/2,canvasHeight/2 + 100,10,"POINT",false),
             createTarget(canvasWidth/2 + 100,canvasHeight/2,10,"POINT",false),
             createTarget(canvasWidth/2,canvasHeight/2 - 100,10,"POINT",false),
@@ -239,7 +239,7 @@ class LevelState{
         var bodyOfInfluenceMass = 1200;
         var bodyOfInfluenceRadius = 20;
 
-        var timedTarget = createTimeTarget(13_000,[
+        var timedTarget = createTimeTarget(13000,[
             createTarget(canvasWidth/2-80,canvasHeight/2,13,"POINT",false),
             createTarget(canvasWidth/2+80,canvasHeight/2,13,"POINT",false),
             createTarget(canvasWidth/2 - 180,canvasHeight/2,13,"POINT",false),
@@ -295,7 +295,7 @@ class LevelState{
         var bodyOfInfluenceMass = 800;
         var bodyOfInfluenceRadius = 15;
 
-        var timedTarget = createTimeTarget(12_000,[
+        var timedTarget = createTimeTarget(12000,[
             createTarget(canvasWidth/2+80,canvasHeight/2,13,"POINT",false),
             createTarget(canvasWidth/2,canvasHeight/2+50,13,"POINT",false),
             createTarget(canvasWidth/2-80,canvasHeight/2,13,"POINT",false),
@@ -393,7 +393,7 @@ class LevelState{
         var bodyOfInfluenceMass = 1200;
         var bodyOfInfluenceRadius = 12;
 
-        var timedTarget = createTimeTarget(12_000,[
+        var timedTarget = createTimeTarget(12000,[
             createTarget(canvasWidth/2-140,canvasHeight/2,10,"POINT",false),
             createTarget(canvasWidth/2,canvasHeight/2,10,"POINT",false),
             createTarget(canvasWidth/2 + 140,canvasHeight/2,10,"POINT",false),
@@ -424,14 +424,29 @@ class LevelState{
         var bodyOfInfluenceMass = 1200;
         var bodyOfInfluenceRadius = 12;
 
-        var timedTarget = createTimeTarget(12_000,[
-            createTarget(canvasWidth/2-140,canvasHeight/2,10,"POINT",false),
-            createTarget(canvasWidth/2,canvasHeight/2,10,"POINT",false),
-            createTarget(canvasWidth/2 + 140,canvasHeight/2,10,"POINT",false),
-        ]);
-
         var targets = [
             createSatTarget(0,-4.8,5,0.01,25,createTarget(canvasWidth/2+220,canvasHeight/2,8,"POINT")),
+            createTarget(0,0,0,"END")];
+
+        var atract = [
+            createAtractor(Math.trunc(canvasWidth/2)+180,Math.trunc(canvasHeight/2),13,1200)
+        ];
+
+        var rocks = [];
+        return new LevelState(18,playerPosition,playerVelocity,playerMass,playerRadius,200,bodyOfInfluencePosition,bodyOfInfluenceMass,bodyOfInfluenceRadius,targets,rocks,atract);
+    }
+    static temp(){
+        var playerPosition = {x:Math.trunc(canvasWidth/2)-230,y:Math.trunc(canvasHeight/2)};
+        var playerVelocity = {x:0,y:-3.8};
+        var playerMass = 0.2;
+        var playerRadius = 4;
+
+        var bodyOfInfluencePosition = {x:Math.trunc(canvasWidth/2)-180,y:Math.trunc(canvasHeight/2)};
+        var bodyOfInfluenceMass = 1200;
+        var bodyOfInfluenceRadius = 12;
+
+        var targets = [
+            createSatTarget(0,-4.8,5,0.01,25,createTarget(canvasWidth/2+220,canvasHeight/2,0,"POINT")),
             createTarget(0,0,0,"END")];
 
         var atract = [
@@ -633,6 +648,8 @@ class LevelState{
         }
         if(nextDist <= this.playerRadius + this.bodyOfInfluenceRadius){
             this.crashed = true;
+            this.crashed = true;
+            zzfx(...[soundToggle ? 0.8 : 0,,977,,.3,.81,3,3.75,.5,,,,.06,.3,-12,.2,.35,.78,]).start();
         }
         this.rocks.forEach(s => {
             if(calcDistance({x:s.x,y:s.y},this.playerPosition) <= s.r + this.playerRadius){
